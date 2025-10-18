@@ -1,0 +1,9 @@
+Essential Docker Commands
+
+docker-compose pull – grab the base images (python:3.11-slim, postgres:15, redis:7, selenium/standalone-chrome:115.0) ahead of time so the first build is quicker.
+docker-compose build backend worker – build the FastAPI backend and Celery worker images once you clone the repo on a new machine.
+docker-compose up --build – start the full stack (PostgreSQL, Redis, Selenium, backend, worker) in the foreground and rebuild if files changed.
+docker-compose up -d --build – same as above but runs everything detached; follow up with docker-compose logs -f backend or docker-compose logs -f worker to tail logs.
+docker-compose restart backend worker – reload just the Python services after code changes without touching Redis/Postgres/Selenium.
+docker-compose stop / docker-compose down – stop all containers (use down to remove them along with the default network).
+These commands, run from the project root on your new device, will bring every required container online.

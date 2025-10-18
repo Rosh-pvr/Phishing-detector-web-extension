@@ -1,0 +1,10 @@
+DOMAIN SCORE GIVE AS score in the PHISH_DETECTOR.
+
+
+In each analysis the task looks up the domain’s creation date (via WHOIS). It then converts that age into a “domain age score” that feeds the overall risk score:
+
+If WHOIS has no creation date → score 20 (treated as suspicious).
+Age < 30 days → score 30 (very risky).
+Age between 30 days and 1 year → score 15 (moderately risky).
+Age ≥ 1 year → score 0 (no penalty).
+So the younger or unknown the domain, the higher the score, increasing odds of a PHISHING verdict.

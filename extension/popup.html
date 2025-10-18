@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Phish Detector</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Phish Detector</h1>
+      <p class="subtitle">Check the current tab or paste any URL.</p>
+    </header>
+
+    <section class="config">
+      <label for="apiBase">API Base URL</label>
+      <input id="apiBase" type="text" placeholder="http://localhost:8000" />
+      <button id="saveApiBase" type="button">Save</button>
+      <span id="apiBaseStatus" class="status"></span>
+    </section>
+
+    <form id="analyzeForm">
+      <label for="urlInput">URL to analyze</label>
+      <div class="url-row">
+        <input id="urlInput" type="url" required />
+        <button type="button" id="useCurrentTab">Use tab</button>
+      </div>
+      <button id="analyzeButton" type="submit">Analyze</button>
+    </form>
+
+    <section id="result" class="result hidden">
+      <h2>Result</h2>
+      <div id="resultSummary"></div>
+      <pre id="resultDetails" class="hidden"></pre>
+      <button id="toggleDetails" type="button">Show details</button>
+    </section>
+
+    <section id="history" class="history">
+      <h2>Recent history</h2>
+      <div class="history-controls">
+        <button id="refreshHistory" type="button">Refresh</button>
+      </div>
+      <div id="historyList" class="history-list"></div>
+    </section>
+
+    <template id="historyCard">
+      <article class="history-card">
+        <header class="history-card__header">
+          <span class="history-card__verdict"></span>
+          <span class="history-card__score"></span>
+        </header>
+        <div class="history-card__body">
+          <p class="history-card__url"></p>
+          <dl class="history-card__meta">
+            <div>
+              <dt>Status</dt>
+              <dd class="history-card__status"></dd>
+            </div>
+            <div>
+              <dt>Checked</dt>
+              <dd class="history-card__created"></dd>
+            </div>
+          </dl>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

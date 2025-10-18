@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+pydantic
+SQLAlchemy
+psycopg2-binary
+alembic
+celery[redis]
+redis
+requests
+python-whois
+selenium
+typing_extensions
+python-dotenv

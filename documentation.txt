@@ -1,0 +1,62 @@
+# Phish-Detector (CLI + Browser Extension)
+
+Phish-Detector is a self-contained phishing analysis stack that now ships with:
+- **FastAPI backend** powered by Celery, PostgreSQL, and Selenium for heuristics and page inspection.
+- **Typer CLI** for scripting URL scans and inspecting historical verdicts.
+- **Manifest v3 browser extension** to analyze the current tab and review the URL history from the backend.
+
+All components share the same REST API so history is continuously stored in PostgreSQL and reused across the CLI, web extension, and any other integrations.
+
+## Quick start
+
+```bash
+docker-compose up --build
+```
+
+This starts PostgreSQL, Redis, the FastAPI backend, Celery worker, and Selenium grid. The API is exposed at `http://localhost:8000`.
+
+## REST API
+
+The backend exposes:
+
+- `POST /api/analyze` – enqueue a URL for analysis. Returns `{"task_id": "...", "status": "QUEUED"}`.
+- `GET /api/result/{task_id}` – fetch the analysis record including `verdict`, `risk_score`, and raw `details`.
+- `GET /api/history?limit=20&verdict=SAFE|WARNING|PHISHING|UNKNOWN` – paginate stored results for dashboards and the browser extension.
+
+Cross-origin access is enabled via `CORS_ALLOW_ORIGINS` (comma-separated list or `*`). By default all origins are allowed, which is useful while loading the extension unpacked. Lock it down before deploying to production.
+
+## CLI usage
+
+```bash
+python cli/cli.py analyze https://example.com --verbose
+python cli/cli.py history --limit 15 --verdict warning
+```
+
+Set `PHISH_API_URL` if the backend is not on `http://localhost:8000`.
+
+The CLI now renders verdict-aware output (`SAFE`, `WARNING`, `PHISHING`, `UNKNOWN`) that mirrors the browser extension and history endpoint.
+
+## Browser extension
+
+The unpacked extension lives in `extension/` and talks to the same API:
+
+1. In Chromium-based browsers, open `chrome://extensions`, enable **Developer mode**, and load the `extension/` directory as an unpacked extension.
+2. Update the **API Base URL** text box inside the popup if your backend is not `http://localhost:8000`. The value is persisted in `chrome.storage.sync`.
+3. Click **Use tab** to grab the active tab URL or paste any URL manually, then press **Analyze**.
+4. The popup streams task status, shows the verdict once available, and refreshes the last 10 stored results from PostgreSQL.
+
+> **Note:** If you point the extension at a different host, make sure the domain is included in both `CORS_ALLOW_ORIGINS` (backend) and `host_permissions` inside `extension/manifest.json`.
+
+## Environment variables
+
+- `DATABASE_URL` – PostgreSQL connection string.
+- `REDIS_URL` – Redis broker/worker backend.
+- `SELENIUM_URL` – Selenium remote endpoint.
+- `CORS_ALLOW_ORIGINS` – CORS allow list (default `*`).
+- `PHISH_API_URL` – optional override for the CLI default API base URL.
+
+## Local development tips
+
+- Run `docker-compose up --build` at least once to provision the database tables.
+- You can call the API directly with `httpie` or `curl` to seed history for the extension.
+- When tightening security, replace the wildcard CORS configuration and pin the extension `host_permissions` to the deployed backend domain.

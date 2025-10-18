@@ -1,0 +1,59 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: phish
+      POSTGRES_PASSWORD: phish
+      POSTGRES_DB: phishdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  selenium:
+    image: selenium/standalone-chrome:115.0
+    shm_size: '2gb'
+    ports:
+      - "4444:4444"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - redis
+      - selenium
+    environment:
+      DATABASE_URL: postgresql+psycopg2://phish:phish@postgres:5432/phishdb
+      REDIS_URL: redis://redis:6379/0
+      SELENIUM_URL: http://selenium:4444/wd/hub
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A app.celery_app.celery worker --loglevel=info
+    depends_on:
+      - redis
+      - postgres
+      - selenium
+    environment:
+      DATABASE_URL: postgresql+psycopg2://phish:phish@postgres:5432/phishdb
+      REDIS_URL: redis://redis:6379/0
+      SELENIUM_URL: http://selenium:4444/wd/hub
+    volumes:
+      - ./backend:/app
+
+volumes:
+  pgdata:

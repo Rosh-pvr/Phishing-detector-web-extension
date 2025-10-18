@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Phish Detector",
+  "description": "Analyze the current page with the Phish Detector backend and view recent history.",
+  "version": "0.1.0",
+  "action": {
+    "default_title": "Phish Detector",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "http://localhost:8000/*"
+  ]
+}
